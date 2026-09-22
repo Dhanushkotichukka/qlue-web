@@ -65,13 +65,15 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setRadar(radar);
       setHistory(hist);
       lastFetched.current = Date.now();
-      setLoadedOnce(true);
       setError(null);
     } catch {
       if (!silent) setError('Failed to load dashboard data.');
       // silent failures keep last good data
     } finally {
       inFlight.current = false;
+      // Mark the attempt complete even on failure so the UI resolves the
+      // spinner and can show an error/retry state instead of hanging forever.
+      setLoadedOnce(true);
       if (!silent) setLoading(false);
     }
   }, []);
@@ -106,6 +108,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     } catch {
       setError('Failed to load history.');
     } finally {
+      setLoadedOnce(true);
       setLoading(false);
     }
   }, []);
