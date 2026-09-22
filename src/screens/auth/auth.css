@@ -1,0 +1,116 @@
+.auth {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-8) var(--sp-5) var(--sp-10);
+  gap: var(--sp-8);
+}
+.auth__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  animation: qlue-fade-up var(--dur-slow) var(--ease-out);
+}
+.auth__logo {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+.auth__rule {
+  width: 44px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+.auth__tagline {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.auth__card {
+  width: 100%;
+  max-width: 420px;
+  animation: qlue-fade-up var(--dur-slow) var(--ease-out) 80ms both;
+}
+.auth__heading {
+  text-align: center;
+  margin-bottom: var(--sp-1);
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+.auth__sub {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: var(--sp-6);
+}
+.auth__banner {
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin-bottom: var(--sp-4);
+  line-height: 1.4;
+}
+.auth__banner--error {
+  background: var(--error-tint);
+  color: var(--error);
+}
+.auth__banner--warn {
+  background: var(--warning-tint);
+  color: var(--warning);
+}
+.auth__forgot {
+  align-self: flex-end;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.auth__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  color: var(--text-tertiary);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin: var(--sp-5) 0;
+}
+.auth__divider::before,
+.auth__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--hairline);
+}
+.auth__google {
+  height: 54px;
+  width: 100%;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: background var(--dur-fast);
+}
+.auth__google:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+}
+.auth__foot {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.auth__foot a {
+  color: var(--primary);
+  font-weight: 700;
+}

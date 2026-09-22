@@ -1,0 +1,172 @@
+/* ============================================================================
+   Qlue design tokens — Apple / iOS Human Interface inspired.
+   Light = pure white, Dark = OLED black. Forest-green primary, iOS accents.
+   Ported from Flutter AppThemeColors, elevated for the web.
+   ========================================================================== */
+
+:root {
+  /* Type */
+  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Radii — iOS continuous-corner scale */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --r-2xl: 36px;
+  --r-pill: 999px;
+
+  /* Spacing scale (4pt grid) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 140ms;
+  --dur: 240ms;
+  --dur-slow: 420ms;
+
+  /* Layout */
+  --tabbar-h: 64px;
+  --maxw: 1160px;
+  --maxw-narrow: 520px;
+
+  /* Fixed accent hues shared across themes */
+  --module-resume: #007aff;
+  --module-hr: #ff2d55;
+  --module-web: #5e5ce6;
+  --module-intro: #ff9f0a;
+}
+
+/* ---------------------------------------------------------------- LIGHT --- */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-tertiary: #f4f4f5;
+  --card: #ffffff;
+  --card-elevated: #ffffff;
+  --border: #e5e5e5;
+  --border-subtle: #f0f0f2;
+  --hairline: rgba(0, 0, 0, 0.08);
+
+  --text: #000000;
+  --text-secondary: #525252;
+  --text-tertiary: #a1a1aa;
+  --text-inverse: #ffffff;
+
+  --primary: #2f6f5b;
+  --primary-strong: #294a41;
+  --primary-grad: linear-gradient(135deg, #338068, #274b40);
+  --primary-tint: rgba(47, 111, 91, 0.12);
+  --primary-tint-weak: rgba(47, 111, 91, 0.06);
+  --on-primary: #ffffff;
+
+  --secondary: #34c759;
+  --success: #34c759;
+  --success-tint: rgba(52, 199, 89, 0.14);
+  --error: #ff3b30;
+  --error-tint: rgba(255, 59, 48, 0.12);
+  --warning: #ff9500;
+  --warning-tint: rgba(255, 149, 0, 0.14);
+  --info: #007aff;
+
+  --module-resume: #007aff;
+  --module-resume-tint: rgba(0, 122, 255, 0.12);
+  --module-hr: #ff2d55;
+  --module-hr-tint: rgba(255, 45, 85, 0.12);
+  --module-web: #5e5ce6;
+  --module-web-tint: rgba(94, 92, 230, 0.12);
+  --module-intro: #ff9500;
+  --module-intro-tint: rgba(255, 149, 0, 0.12);
+
+  --input-bg: #fafafa;
+  --input-focus-bg: #ffffff;
+  --placeholder: #a1a1aa;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 1px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.14), 0 6px 16px rgba(0, 0, 0, 0.08);
+
+  /* Liquid glass */
+  --glass-bg: rgba(255, 255, 255, 0.66);
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 12px 40px rgba(20, 40, 34, 0.1);
+
+  --tabbar-bg: rgba(255, 255, 255, 0.8);
+  --scrim: rgba(0, 0, 0, 0.32);
+}
+
+/* ----------------------------------------------------------------- DARK --- */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0a0b0d;
+  --bg-secondary: #101216;
+  --bg-tertiary: #191c22;
+  --card: #14171c;
+  --card-elevated: #1b1f26;
+  --border: #2b3038;
+  --border-subtle: #20242b;
+  --hairline: rgba(255, 255, 255, 0.09);
+
+  --text: #f4f6f8;
+  --text-secondary: #a2acb8;
+  --text-tertiary: #6d7784;
+  --text-inverse: #0a0b0d;
+
+  --primary: #4fae8b;
+  --primary-strong: #305148;
+  --primary-grad: linear-gradient(135deg, #57bd97, #2f7d63);
+  --primary-tint: rgba(79, 174, 139, 0.18);
+  --primary-tint-weak: rgba(79, 174, 139, 0.1);
+  --on-primary: #04120d;
+
+  --secondary: #30d158;
+  --success: #30d158;
+  --success-tint: rgba(48, 209, 88, 0.18);
+  --error: #ff453a;
+  --error-tint: rgba(255, 69, 58, 0.16);
+  --warning: #ff9f0a;
+  --warning-tint: rgba(255, 159, 10, 0.18);
+  --info: #0a84ff;
+
+  --module-resume: #0a84ff;
+  --module-resume-tint: rgba(10, 132, 255, 0.18);
+  --module-hr: #ff375f;
+  --module-hr-tint: rgba(255, 55, 95, 0.18);
+  --module-web: #5e5ce6;
+  --module-web-tint: rgba(94, 92, 230, 0.2);
+  --module-intro: #ff9f0a;
+  --module-intro-tint: rgba(255, 159, 10, 0.18);
+
+  --input-bg: #141416;
+  --input-focus-bg: #1b1b1e;
+  --placeholder: #6b6b70;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.7);
+
+  --glass-bg: rgba(24, 28, 34, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-highlight: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+
+  --tabbar-bg: rgba(14, 16, 20, 0.82);
+  --scrim: rgba(0, 0, 0, 0.65);
+}

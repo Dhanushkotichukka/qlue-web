@@ -1,0 +1,30 @@
+.flip {
+  display: block;
+  width: 100%;
+  perspective: 1200px;
+  background: none;
+  text-align: left;
+  aspect-ratio: 1.6 / 1;
+}
+.flip__inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: transform 560ms var(--ease-out);
+  transform-style: preserve-3d;
+}
+.flip--on .flip__inner {
+  transform: rotateY(180deg);
+}
+.flip__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.flip__back {
+  transform: rotateY(180deg);
+}

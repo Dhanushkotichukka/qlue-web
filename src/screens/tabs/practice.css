@@ -1,0 +1,113 @@
+.practice__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
+}
+.practice__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+.practice__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+  margin-top: var(--sp-6);
+}
+@media (min-width: 760px) {
+  .practice__grid {
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+  }
+}
+.practice__subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.module-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  overflow: hidden;
+  position: relative;
+}
+.module-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+.module-card__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.module-card__desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-top: 4px;
+}
+.module-card__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  align-self: flex-start;
+  padding: 8px 14px;
+  border-radius: var(--r-sm);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+  max-width: 100%;
+}
+.module-card__chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.module-card__art {
+  width: clamp(84px, 26vw, 132px);
+  align-self: center;
+  display: grid;
+  place-items: center;
+}
+.module-card__art img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.25));
+}
+.module-card__glow {
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 60%;
+  height: 120%;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.resume-pick {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--border);
+  background: var(--bg-secondary);
+  width: 100%;
+  text-align: left;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+.resume-pick--active {
+  border-color: var(--primary);
+  background: var(--primary-tint-weak);
+}
