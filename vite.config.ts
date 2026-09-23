@@ -17,7 +17,7 @@ export default defineConfig({
     // browser sees a same-origin request (no CORS) in dev too.
     proxy: {
       '/api': {
-        target: 'https://xslflxfqub.execute-api.us-east-1.amazonaws.com/prod',
+        target: 'https://quy1n1ioll.execute-api.us-east-1.amazonaws.com/prod',
         changeOrigin: true,
         secure: true,
         rewrite: (p) => p.replace(/^\/api/, ''),
