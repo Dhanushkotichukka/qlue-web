@@ -91,7 +91,7 @@
   height: 120%;
   border-radius: 50%;
   filter: blur(70px);
-  opacity: 0.16;
+  opacity: 0.1;
   pointer-events: none;
 }
 

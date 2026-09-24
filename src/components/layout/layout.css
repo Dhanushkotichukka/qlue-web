@@ -1,48 +1,46 @@
 /* ===== App chrome ======================================================== */
 
 /* ambient background wash — luminous, green-accented field behind the glass */
+/* ambient background — pure (theme) background with two soft accent-green
+   mist glows in the top-right and bottom-left corners, exactly like the Qlue
+   marketing site's AtmosphereBackground. Nothing tints the middle of the
+   field, so glass surfaces frost over black and read as neutral glass. */
 .ambient {
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-  background:
-    radial-gradient(1100px 780px at 82% -10%, var(--amb-1), transparent 58%),
-    radial-gradient(880px 620px at 8% 4%, var(--amb-2), transparent 60%),
-    radial-gradient(1200px 900px at 50% 118%, var(--amb-3), transparent 60%),
-    var(--bg);
+  background: var(--bg);
 }
 .ambient::before,
 .ambient::after {
   content: '';
   position: absolute;
-  width: 58vmax;
-  height: 58vmax;
+  width: clamp(360px, 40vmax, 560px);
+  height: clamp(360px, 40vmax, 560px);
   border-radius: 50%;
-  filter: blur(100px);
+  filter: blur(70px);
 }
 .ambient::before {
-  top: -22vmax;
-  right: -16vmax;
-  background: radial-gradient(circle, var(--amb-1), transparent 66%);
-  opacity: 0.9;
-  animation: amb-drift-a 26s var(--ease-out) infinite alternate;
+  top: -8vmax;
+  right: -6vmax;
+  background: radial-gradient(circle, var(--amb-1), transparent 70%);
+  animation: amb-drift-a 30s var(--ease-out) infinite alternate;
 }
 .ambient::after {
-  bottom: -26vmax;
-  left: -18vmax;
-  background: radial-gradient(circle, var(--amb-3), transparent 64%);
-  opacity: 0.75;
-  animation: amb-drift-b 32s var(--ease-out) infinite alternate;
+  bottom: -8vmax;
+  left: -6vmax;
+  background: radial-gradient(circle, var(--amb-3), transparent 70%);
+  animation: amb-drift-b 34s var(--ease-out) infinite alternate;
 }
 @keyframes amb-drift-a {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(-6vmax, 5vmax, 0) scale(1.12); }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-3vmax, 2.5vmax, 0); }
 }
 @keyframes amb-drift-b {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(6vmax, -4vmax, 0) scale(1.1); }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(3vmax, -2.5vmax, 0); }
 }
 
 /* ---- top bar ------------------------------------------------------------ */
@@ -94,9 +92,14 @@
     linear-gradient(0deg, var(--glass-tint), var(--glass-tint)),
     var(--glass-bg);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow), 0 0 48px -16px var(--glass-glow);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+}
+[data-theme='dark'] .navbar__inner {
+  /* neutral glass pill like the reference nav — blur only, no green halo. */
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
 }
 [data-glass='classic'] .navbar__inner {
   backdrop-filter: none;

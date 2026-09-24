@@ -17,8 +17,8 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--r-lg);
   box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(calc(26px * var(--glass-intensity, 1))) saturate(190%);
-  -webkit-backdrop-filter: blur(calc(26px * var(--glass-intensity, 1))) saturate(190%);
+  backdrop-filter: blur(calc(26px * var(--glass-intensity, 1))) saturate(155%);
+  -webkit-backdrop-filter: blur(calc(26px * var(--glass-intensity, 1))) saturate(155%);
   overflow: hidden;
 }
 .glass::before {
@@ -39,6 +39,20 @@
   mask-composite: exclude;
   pointer-events: none;
   opacity: calc(0.9 * var(--glass-intensity, 1));
+}
+/* Dark mode faithfully reproduces the Qlue marketing-site glass card: a
+   vertical WHITE translucent gradient over pure black, frosted with blur
+   only — no saturate, which would tint the frost green over the ambient
+   glows and produce the heavy wash we're eliminating. */
+[data-theme='dark'] .glass {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.115) 0%,
+    rgba(255, 255, 255, 0.035) 45%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  backdrop-filter: blur(calc(28px * var(--glass-intensity, 1)));
+  -webkit-backdrop-filter: blur(calc(28px * var(--glass-intensity, 1)));
 }
 [data-glass='classic'] .glass {
   backdrop-filter: none;
