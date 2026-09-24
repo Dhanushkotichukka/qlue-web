@@ -68,6 +68,7 @@ export class InterviewController {
   private isSessionEnded = false;
   private silenceStrikes = 0;
   private sttRetryCount = 0;
+  private echoRejects = 0;
   private activeSessionConflictId: string | null = null;
 
   private ws: WebSocketClient | null = null;
@@ -78,6 +79,12 @@ export class InterviewController {
   private isInitializing = false;
   private pendingTermination = false;
   private safetyTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Delay between the interviewer's audio ending and the mic opening, so the
+  // speaker's acoustic tail settles and the recognizer can't transcribe the
+  // AI's own voice as the candidate's answer (the "listening to its own words"
+  // echo bug on speaker setups without hardware echo cancellation).
+  private static readonly micOpenDelayMs = 350;
 
   constructor() {
     this.snapshot = this.buildSnapshot();
@@ -144,6 +151,8 @@ export class InterviewController {
     this.transcript = [];
     this.phase = 'ready';
     this.silenceStrikes = 0;
+    this.sttRetryCount = 0;
+    this.echoRejects = 0;
     this.errorMessage = null;
     this.activeSessionConflictId = null;
     this.notify();
@@ -306,6 +315,7 @@ export class InterviewController {
     const finalText: string = payload.questionText ?? '';
     this.transcript.push({ role: 'AI', text: finalText, timestamp: new Date() });
     this.currentQuestion = finalText || null;
+    this.echoRejects = 0;
     this.audioUrl = payload.audioUrl ?? null;
     const audioData: string | undefined = payload.audioData;
     // Keep the "thinking" state on screen (isStreamingText stays true) until
@@ -327,16 +337,12 @@ export class InterviewController {
 
     const afterPlayback = () => {
       revealText(); // guarantees the text is shown even if 'playing' never fired
-      this.phase = 'listening';
-      this.notify();
-      this.startListening();
+      this.beginListeningAfterPlayback();
     };
     const onPlaybackError = (error: unknown) => {
       revealText();
       this.errorMessage = `Audio playback failed: ${error}`;
-      this.phase = 'listening';
-      this.notify();
-      this.startListening();
+      this.beginListeningAfterPlayback();
     };
 
     if (this.audioUrl) {
@@ -347,6 +353,57 @@ export class InterviewController {
       revealText();
       afterPlayback();
     }
+  }
+
+  /**
+   * Hand off from the interviewer's audio to the candidate's mic. Cuts any
+   * audio that might still be sounding (a stream whose 'ended' fired early, or
+   * the 30s TTS safety timeout firing mid-playback) and waits a short beat for
+   * the speaker's acoustic tail to settle BEFORE opening the mic — otherwise
+   * the Web Speech recognizer, which has no echo cancellation against the
+   * played audio, transcribes the AI's own question as the candidate's answer.
+   */
+  private beginListeningAfterPlayback(): void {
+    if (this.isEnding || this.isSessionEnded) {
+      if (this.pendingTermination) this.finalizeTermination();
+      return;
+    }
+    this.tts.stop();
+    this.phase = 'listening';
+    this.notify();
+    setTimeout(() => {
+      if (this.isEnding || this.isSessionEnded) return;
+      this.startListening();
+    }, InterviewController.micOpenDelayMs);
+  }
+
+  private normalizeForEcho(s: string): string {
+    return s
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /**
+   * True when a recognized transcript is really the interviewer's own spoken
+   * question bleeding back through the mic, not the candidate speaking. Catches
+   * the exact symptom reported ("I need you to…", the start of the AI line) via
+   * a contiguous prefix/substring match, plus a high-word-overlap fallback for
+   * transcripts the recognizer mishears slightly. Kept conservative (>=3 words)
+   * so genuine short answers are never swallowed.
+   */
+  private isLikelyEcho(text: string): boolean {
+    const t = this.normalizeForEcho(text);
+    if (!t) return false;
+    const q = this.normalizeForEcho(this.currentQuestion ?? '');
+    if (!q) return false;
+    const words = t.split(' ');
+    if (words.length < 3) return false;
+    if (q.startsWith(t) || q.includes(t)) return true;
+    const qWords = new Set(q.split(' '));
+    const overlap = words.filter((w) => qWords.has(w)).length / words.length;
+    return words.length >= 4 && overlap >= 0.85;
   }
 
   private handleTermination(): void {
@@ -389,17 +446,43 @@ export class InterviewController {
 
     this.stt.startListening({
       onPartial: (text) => {
+        // Never surface the interviewer's own words on screen as the
+        // candidate's transcript while the speaker audio is bleeding back in.
+        if (this.isLikelyEcho(text)) return;
         this.partialTranscript = text;
         this.notify();
       },
       onFinal: (text) => {
-        this.finalTranscript = text;
+        const clean = text.trim();
+        if (clean && this.isLikelyEcho(clean)) {
+          // The mic captured the AI's question, not an answer. Discard it and
+          // hand the mic back to the candidate rather than submitting the
+          // interviewer's own words — up to a small cap so a persistent echo
+          // can't wedge the turn loop.
+          this.isListening = false;
+          this.partialTranscript = '';
+          if (this.safetyTimer) clearTimeout(this.safetyTimer);
+          this.echoRejects++;
+          this.notify();
+          if (this.echoRejects <= 2) {
+            this.beginListeningAfterPlayback();
+            return;
+          }
+          this.echoRejects = 0;
+          this.finalTranscript = '';
+          this.silenceStrikes++;
+          this.submitResponse('');
+          this.notify();
+          return;
+        }
+        this.echoRejects = 0;
+        this.finalTranscript = clean;
         this.isListening = false;
         this.sttRetryCount = 0;
         if (this.safetyTimer) clearTimeout(this.safetyTimer);
-        if (text.length === 0) this.silenceStrikes++;
+        if (clean.length === 0) this.silenceStrikes++;
         else this.silenceStrikes = 0;
-        this.submitResponse(text);
+        this.submitResponse(clean);
         this.notify();
       },
       onError: () => this.handleSttFailure(),
