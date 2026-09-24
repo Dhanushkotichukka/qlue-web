@@ -45,7 +45,20 @@ export class SttService {
   private listening = false;
   private localeId = 'en-IN';
   private finalBuffer = '';
+  private currentInterim = '';
   private args: ListenArgs | null = null;
+  private endpointTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // END-OF-SPEECH ENDPOINTING (latency fix):
+  // With `continuous = true`, Chrome keeps the mic session open long after the
+  // user stops talking and only fires `onend` after its own internal silence
+  // timeout (frequently 8s+). That tail is the "it takes too long after I
+  // finish speaking" lag — the Flutter app feels instant because the native
+  // mobile recognizer endpoints ~1s after speech ends. We reproduce that by
+  // auto-stopping this many ms after the LAST recognized word. Long enough to
+  // ride over natural inter-word/inter-sentence pauses, short enough to feel
+  // responsive. Tunable: raise if users get cut off while thinking mid-answer.
+  private static readonly endOfSpeechMs = 2500;
 
   async init(): Promise<boolean> {
     if (this.initialized) return true;
@@ -77,6 +90,7 @@ export class SttService {
     }
     this.args = args;
     this.finalBuffer = '';
+    this.currentInterim = '';
 
     const rec = new Ctor();
     rec.lang = this.localeId;
@@ -100,8 +114,14 @@ export class SttService {
           interim += transcript;
         }
       }
+      this.currentInterim = interim;
       const partial = (this.finalBuffer + interim).trim();
-      if (partial) args.onPartial(partial);
+      if (partial) {
+        args.onPartial(partial);
+        // The user is actively speaking — (re)start the end-of-speech
+        // countdown so we only submit once they've truly gone quiet.
+        this.armEndpoint();
+      }
     };
 
     rec.onerror = (e: any) => {
@@ -116,7 +136,10 @@ export class SttService {
 
     rec.onend = () => {
       this.listening = false;
-      const finalText = this.finalBuffer.trim();
+      this.clearEndpoint();
+      // Prefer the finalized transcript, but fall back to the last interim so a
+      // turn is never lost when Chrome ends before promoting it to final.
+      const finalText = (this.finalBuffer + this.currentInterim).trim();
       args.onStatus?.('done');
       // Emit the accumulated final transcript when the engine stops.
       args.onFinal(finalText);
@@ -130,7 +153,33 @@ export class SttService {
     }
   }
 
+  /**
+   * Restart the silence countdown. When it elapses we `stop()` the recognizer,
+   * which flushes the pending result and fires `onend` → onFinal, submitting
+   * the turn without waiting for Chrome's much longer built-in timeout.
+   */
+  private armEndpoint(): void {
+    this.clearEndpoint();
+    this.endpointTimer = setTimeout(() => {
+      if (this.recognition) {
+        try {
+          this.recognition.stop();
+        } catch {
+          /* ignore */
+        }
+      }
+    }, SttService.endOfSpeechMs);
+  }
+
+  private clearEndpoint(): void {
+    if (this.endpointTimer) {
+      clearTimeout(this.endpointTimer);
+      this.endpointTimer = null;
+    }
+  }
+
   stop(): void {
+    this.clearEndpoint();
     if (this.recognition) {
       try {
         this.recognition.stop();

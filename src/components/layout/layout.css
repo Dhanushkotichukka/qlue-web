@@ -1,34 +1,48 @@
 /* ===== App chrome ======================================================== */
 
-/* ambient background wash — subtle, one per page, respects reduce-motion */
+/* ambient background wash — luminous, green-accented field behind the glass */
 .ambient {
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-  background: var(--bg);
+  background:
+    radial-gradient(1100px 780px at 82% -10%, var(--amb-1), transparent 58%),
+    radial-gradient(880px 620px at 8% 4%, var(--amb-2), transparent 60%),
+    radial-gradient(1200px 900px at 50% 118%, var(--amb-3), transparent 60%),
+    var(--bg);
 }
 .ambient::before,
 .ambient::after {
   content: '';
   position: absolute;
-  width: 60vmax;
-  height: 60vmax;
+  width: 58vmax;
+  height: 58vmax;
   border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.5;
+  filter: blur(100px);
 }
 .ambient::before {
-  top: -20vmax;
-  right: -14vmax;
-  background: radial-gradient(circle, var(--primary-tint), transparent 68%);
+  top: -22vmax;
+  right: -16vmax;
+  background: radial-gradient(circle, var(--amb-1), transparent 66%);
+  opacity: 0.9;
+  animation: amb-drift-a 26s var(--ease-out) infinite alternate;
 }
 .ambient::after {
-  bottom: -24vmax;
-  left: -16vmax;
-  background: radial-gradient(circle, var(--module-web-tint), transparent 66%);
-  opacity: 0.35;
+  bottom: -26vmax;
+  left: -18vmax;
+  background: radial-gradient(circle, var(--amb-3), transparent 64%);
+  opacity: 0.75;
+  animation: amb-drift-b 32s var(--ease-out) infinite alternate;
+}
+@keyframes amb-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-6vmax, 5vmax, 0) scale(1.12); }
+}
+@keyframes amb-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(6vmax, -4vmax, 0) scale(1.1); }
 }
 
 /* ---- top bar ------------------------------------------------------------ */
