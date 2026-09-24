@@ -45,6 +45,13 @@ export function InterviewSessionScreen() {
   const [showType, setShowType] = useState(!isSttSupported());
   const navigatedRef = useRef(false);
   const startedRef = useRef(false);
+  // Latches true once THIS mount's session is actually underway. The
+  // controller is a shared singleton, so on mount its snapshot still carries
+  // the PREVIOUS interview's isSessionEnded=true; without this guard the
+  // navigate effect below fires on that stale flag and bounces a freshly
+  // started interview straight to the old feedback report while the new
+  // session runs unseen in the background.
+  const activatedRef = useRef(false);
 
   // start the session once
   useEffect(() => {
@@ -70,14 +77,25 @@ export function InterviewSessionScreen() {
     return () => clearInterval(id);
   }, [state.isConnecting, moduleType]);
 
-  // navigate away on session end
+  // navigate away on session end — but only for a session THIS screen started.
+  // We wait until the new session is observably underway (connecting or an
+  // active phase) before honouring isSessionEnded, so the stale ended-flag left
+  // on the shared controller by the previous interview can't trigger a bounce.
   useEffect(() => {
-    if (state.isSessionEnded && !navigatedRef.current) {
+    if (
+      state.isConnecting ||
+      state.phase === 'speaking' ||
+      state.phase === 'listening' ||
+      state.phase === 'processing'
+    ) {
+      activatedRef.current = true;
+    }
+    if (state.isSessionEnded && activatedRef.current && !navigatedRef.current) {
       navigatedRef.current = true;
       if (moduleType === 'WEBSITE') navigate('/dashboard', { replace: true });
       else navigate(`/feedback/${state.sessionId}`, { replace: true });
     }
-  }, [state.isSessionEnded, state.sessionId, moduleType, navigate]);
+  }, [state.isConnecting, state.phase, state.isSessionEnded, state.sessionId, moduleType, navigate]);
 
   const isTutor = moduleType === 'WEBSITE';
   const phase = state.phase;

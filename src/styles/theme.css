@@ -179,17 +179,18 @@
      a translucent WHITE vertical gradient over pure black (never a green
      wash), a faint hairline, a bright specular top edge, a soft grounded
      shadow, and blur-only frost. Green lives only in accents/atmosphere. */
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-highlight: rgba(255, 255, 255, 0.42);
-  --glass-sheen: rgba(255, 255, 255, 0.11);
-  --glass-tint: rgba(255, 255, 255, 0.01);
-  --glass-glow: rgba(52, 211, 153, 0.12);
-  --glass-inset: rgba(255, 255, 255, 0.04);
-  --glass-inset-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+  --glass-sheen: rgba(255, 255, 255, 0.16);
+  --glass-tint: rgba(255, 255, 255, 0.015);
+  --glass-glow: rgba(52, 211, 153, 0.14);
+  --glass-inset: rgba(255, 255, 255, 0.05);
+  --glass-inset-border: rgba(255, 255, 255, 0.1);
   --glass-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 20px 50px rgba(0, 0, 0, 0.55),
+    0 2px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
   /* Atmosphere — pure black with two soft accent-green mist glows in the
      top-right and bottom-left corners (the marketing site's signature). */
