@@ -152,6 +152,7 @@ export class InterviewController {
   async initSession(
     type: string,
     opts?: { resumeId?: string; websiteUrl?: string },
+    retried = false,
   ): Promise<void> {
     if (this.isInitializing) return;
     this.isInitializing = true;
@@ -187,8 +188,26 @@ export class InterviewController {
       } catch (e) {
         if (axios.isAxiosError(e) && e.response?.status === 409) {
           const activeId = e.response?.data?.activeSessionId?.toString();
+          if (activeId && !retried) {
+            // A previous session is still open on the backend — almost always
+            // an interview that failed before it could terminate. Clear it and
+            // start fresh once, instead of dead-ending the user on a start
+            // they explicitly asked for.
+            try {
+              await api().post(Api.interviewTerminate, {
+                sessionId: activeId,
+                reason: 'STALE_SESSION_CLEANUP',
+              });
+            } catch {
+              /* best-effort cleanup */
+            }
+            this.isInitializing = false; // release the guard before retrying
+            await this.initSession(type, opts, true);
+            return;
+          }
           if (activeId) {
-            this.errorMessage = 'You have an active interview session. Reconnect to it?';
+            this.errorMessage =
+              'You still have an active interview session. Please end it and try again.';
             this.sessionId = activeId;
             this.activeSessionConflictId = activeId;
             this.isConnecting = false;

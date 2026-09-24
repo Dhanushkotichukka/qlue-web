@@ -23,6 +23,8 @@ export class WebSocketClient {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private intentionalDisconnect = false;
+  /** True once the socket has successfully opened at least once this connect(). */
+  private opened = false;
   private connectResolve: (() => void) | null = null;
   private connectReject: ((e: unknown) => void) | null = null;
   private connectPromise: Promise<void> | null = null;
@@ -49,6 +51,7 @@ export class WebSocketClient {
       return this.connectPromise ?? Promise.resolve();
     }
     this.status = 'connecting';
+    this.opened = false;
     this.connectPromise = new Promise<void>((resolve, reject) => {
       this.connectResolve = resolve;
       this.connectReject = reject;
@@ -64,11 +67,15 @@ export class WebSocketClient {
 
       this.socket.onopen = () => {
         const wasReconnecting = this.reconnectAttempts > 0;
+        this.opened = true;
         this.status = 'connected';
         this.reconnectAttempts = 0;
         this.startHeartbeat();
         if (wasReconnecting) this.handlers.onReconnect?.();
-        this.connectResolve?.();
+        const resolve = this.connectResolve;
+        this.connectResolve = null;
+        this.connectReject = null;
+        resolve?.();
       };
       this.socket.onmessage = (ev) => this.handleMessage(ev.data);
       this.socket.onerror = () => {
@@ -77,8 +84,10 @@ export class WebSocketClient {
       this.socket.onclose = () => this.handleDisconnect();
     } catch (e) {
       this.status = 'disconnected';
-      this.connectReject?.(e);
-      this.scheduleReconnect();
+      const reject = this.connectReject;
+      this.connectResolve = null;
+      this.connectReject = null;
+      reject?.(e);
       throw e;
     }
 
@@ -102,6 +111,21 @@ export class WebSocketClient {
     if (this.intentionalDisconnect) return; // FE-BUG #6: stay silent
     this.status = 'disconnected';
     this.stopHeartbeat();
+
+    // Socket closed before it ever opened → the handshake failed (bad URL,
+    // wrong stage, auth rejected at connect). This is a connect() failure, not
+    // a mid-session drop: reject the pending connect() so initSession surfaces
+    // an error, and do NOT fire onDisconnect (which would end the session and
+    // bounce the user straight to an empty feedback report).
+    if (!this.opened && this.connectReject) {
+      const reject = this.connectReject;
+      this.connectResolve = null;
+      this.connectReject = null;
+      reject(new Error('WebSocket connection failed'));
+      return;
+    }
+
+    this.opened = false;
     this.handlers.onDisconnect?.();
     this.scheduleReconnect();
   }
