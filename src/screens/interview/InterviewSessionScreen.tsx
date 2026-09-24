@@ -93,11 +93,12 @@ export function InterviewSessionScreen() {
     return '';
   }, [state.isConnecting, phase, state.isStreamingText, state.silenceStrikes, msgIndex, moduleType]);
 
-  const aiText = state.isConnecting
-    ? ''
-    : state.isStreamingText && state.subtitleText
-      ? state.subtitleText
-      : state.finalQuestionText || (state.questionText !== '...' ? state.questionText : '');
+  // The question is revealed only once the voice actually starts (the
+  // controller sets finalQuestionText on audio playback start), so the text
+  // and the spoken question land together instead of the text showing 3–5s
+  // ahead while the backend is still synthesizing speech. During connecting,
+  // streaming and processing we show only the orb + status.
+  const aiText = state.isConnecting || state.isStreamingText ? '' : state.finalQuestionText;
 
   const userText =
     state.isListening && state.partialTranscript

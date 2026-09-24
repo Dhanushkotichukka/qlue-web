@@ -71,25 +71,37 @@
   text-align: left;
 }
 
-/* ---- top navigation bar ------------------------------------------------- */
+/* ---- top navigation bar — floating glass pill --------------------------- */
 .navbar {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--tabbar-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid var(--hairline);
-  padding-top: env(safe-area-inset-top);
+  padding: calc(env(safe-area-inset-top) + var(--sp-3)) var(--sp-4) var(--sp-2);
+  pointer-events: none;
 }
 .navbar__inner {
+  pointer-events: auto;
   max-width: var(--maxw);
   margin: 0 auto;
-  height: 62px;
+  height: 60px;
   display: flex;
   align-items: center;
   gap: var(--sp-4);
-  padding: 0 var(--sp-5);
+  padding: 0 var(--sp-3) 0 var(--sp-5);
+  border-radius: var(--r-pill);
+  background:
+    linear-gradient(158deg, var(--glass-sheen), transparent 62%),
+    linear-gradient(0deg, var(--glass-tint), var(--glass-tint)),
+    var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), 0 0 48px -16px var(--glass-glow);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+[data-glass='classic'] .navbar__inner {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--card-elevated);
 }
 .navbar__brand {
   font-size: 1.4rem;

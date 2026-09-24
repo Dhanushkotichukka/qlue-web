@@ -6,7 +6,7 @@
 export class TtsService {
   private audio: HTMLAudioElement | null = null;
 
-  private async playSource(src: string): Promise<void> {
+  private async playSource(src: string, onStart?: () => void): Promise<void> {
     await this.stop();
     return new Promise<void>((resolve) => {
       const audio = new Audio(src);
@@ -20,6 +20,7 @@ export class TtsService {
         clearTimeout(safety);
         audio.onended = null;
         audio.onerror = null;
+        audio.onplaying = null;
         resolve();
       };
 
@@ -28,6 +29,16 @@ export class TtsService {
 
       audio.onended = done;
       audio.onerror = done;
+
+      // Fire the moment sound actually begins (after the browser has buffered
+      // enough to play), so the caller can reveal the question text in sync
+      // with the voice instead of several seconds ahead of it.
+      let started = false;
+      audio.onplaying = () => {
+        if (started) return;
+        started = true;
+        onStart?.();
+      };
 
       audio.play().catch(() => {
         // Autoplay can be blocked until the user gestures; the interview flow
@@ -38,12 +49,12 @@ export class TtsService {
     });
   }
 
-  playUrl(url: string): Promise<void> {
-    return this.playSource(url);
+  playUrl(url: string, onStart?: () => void): Promise<void> {
+    return this.playSource(url, onStart);
   }
 
-  playBase64(base64Data: string, mime = 'audio/mpeg'): Promise<void> {
-    return this.playSource(`data:${mime};base64,${base64Data}`);
+  playBase64(base64Data: string, onStart?: () => void, mime = 'audio/mpeg'): Promise<void> {
+    return this.playSource(`data:${mime};base64,${base64Data}`, onStart);
   }
 
   async stop(): Promise<void> {

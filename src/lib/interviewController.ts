@@ -303,23 +303,36 @@ export class InterviewController {
   }
 
   private handleTurnComplete(payload: any): void {
-    this.isStreamingText = false;
-    this.transcript.push({ role: 'AI', text: payload.questionText ?? '', timestamp: new Date() });
-    this.currentQuestion = payload.questionText ?? null;
-    this.questionText = this.currentQuestion ?? '...';
-    this.finalQuestionText = this.questionText;
-    this.subtitleText = this.questionText;
+    const finalText: string = payload.questionText ?? '';
+    this.transcript.push({ role: 'AI', text: finalText, timestamp: new Date() });
+    this.currentQuestion = finalText || null;
     this.audioUrl = payload.audioUrl ?? null;
     const audioData: string | undefined = payload.audioData;
+    // Keep the "thinking" state on screen (isStreamingText stays true) until
+    // the voice actually starts — the question text is revealed in sync with
+    // the audio, not 3–5s earlier while the backend is still synthesizing it.
     this.phase = 'speaking';
     this.notify();
 
+    let revealed = false;
+    const revealText = () => {
+      if (revealed) return;
+      revealed = true;
+      this.isStreamingText = false;
+      this.questionText = finalText || '...';
+      this.finalQuestionText = this.questionText;
+      this.subtitleText = this.questionText;
+      this.notify();
+    };
+
     const afterPlayback = () => {
+      revealText(); // guarantees the text is shown even if 'playing' never fired
       this.phase = 'listening';
       this.notify();
       this.startListening();
     };
     const onPlaybackError = (error: unknown) => {
+      revealText();
       this.errorMessage = `Audio playback failed: ${error}`;
       this.phase = 'listening';
       this.notify();
@@ -327,10 +340,11 @@ export class InterviewController {
     };
 
     if (this.audioUrl) {
-      this.tts.playUrl(this.audioUrl).then(afterPlayback).catch(onPlaybackError);
+      this.tts.playUrl(this.audioUrl, revealText).then(afterPlayback).catch(onPlaybackError);
     } else if (audioData) {
-      this.tts.playBase64(audioData).then(afterPlayback).catch(onPlaybackError);
+      this.tts.playBase64(audioData, revealText).then(afterPlayback).catch(onPlaybackError);
     } else {
+      revealText();
       afterPlayback();
     }
   }
